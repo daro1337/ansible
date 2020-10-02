@@ -2,15 +2,30 @@
 - hosts: all
   user: root
   vars:
-    ansible_python_interpreter: auto
+    ansible_python_interpreter: python3
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
     ansible_user: root
-  vars_files:
-    - secrets.yml
+  # vars_files:
+  #   - secrets.yml
 
   tasks:
 
-  - name: Roles for Debian Family OS
-    include: roles/ubuntu/tasks/main.yml
-    tags: ubuntu
-    when: ansible_os_family == "Debian"
+  # - name: Roles for Debian Family OS
+  #   include: roles/ubuntu/tasks/main.yml
+  #   tags: ubuntu
+  #   when: ansible_os_family == "Debian"
+  
+  - name: Roles for k8s-common
+    include: roles/k8s-common/main.yml
+    tags: k8s-common
+    when: "'k8s' in group_names"
+
+  - name: Roles for tf-kubelet
+    include: roles/tf-k8s-kubelet/main.yml
+    tags: tf-kubelet
+    when: "'tf-kubelet' in group_names"
+
+  - name: Roles for tf-k8s-master
+    include: roles/tf-k8s-master/main.yml
+    tags: tf-k8s-master
+    when: "'tf-k8s-master' in group_names"
