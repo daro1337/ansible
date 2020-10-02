@@ -1,0 +1,28 @@
+  - name: update and upgrade
+    apt:
+      upgrade: yes
+
+  - name: install packages
+    package:
+      name:
+        - htop
+        - mtr-tiny
+        - qemu-guest-agent
+        - git
+        - fio
+        - python3-pip
+        - dstat
+      state: present
+  - name: remove useless software
+    package:
+      name:
+        - snapd
+        - cloud-init
+        - ftp
+        - lxc
+        - ufw
+      state: absent
+
+  - name: Remove dependencies that are no longer required
+    apt:
+      autoremove: yes

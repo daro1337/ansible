@@ -1,0 +1,9 @@
+- name: software
+  include: software.yml
+  tags: software
+- name: users
+  include: users.yml
+  tags: users
+- name: host_name
+  include: host_name.yml
+  tags: host_name

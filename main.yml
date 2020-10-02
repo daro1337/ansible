@@ -1,0 +1,16 @@
+---
+- hosts: all
+  user: root
+  vars:
+    ansible_python_interpreter: auto
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    ansible_user: root
+  vars_files:
+    - secrets.yml
+
+  tasks:
+
+  - name: Roles for Debian Family OS
+    include: roles/ubuntu/tasks/main.yml
+    tags: ubuntu
+    when: ansible_os_family == "Debian"
