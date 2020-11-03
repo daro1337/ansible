@@ -2,25 +2,35 @@
   modprobe:
     name: br_netfilter
     state: present
+  
+- name: Add the acpiphp module
+  modprobe:
+    name: acpiphp
+    state: present
 
+- name: Add the pci_hotplug module
+  modprobe:
+    name: pci_hotplug
+    state: present
+  
 - name: systemctl net.bridge.bridge-nf-call-iptables
   sysctl:
     name: net.bridge.bridge-nf-call-ip6tables
     value: 1
-    sysctl_file: /etc/sysctl.d/k8s.conf
+    sysctl_file: /etc/sysctl.conf
     reload: yes
 - name: systemctl net.bridge.bridge-nf-call-iptables
   sysctl:
     name: net.bridge.bridge-nf-call-iptables
     value: 1
-    sysctl_file: /etc/sysctl.d/k8s.conf
+    sysctl_file: /etc/sysctl.conf
     reload: yes
-
-- name: install common packages
-  apt:
-    name:
-      - python3-apt
-      - software-properties-common
+- name: systemctl net.ipv4.conf.all.forwarding
+  sysctl:
+    name: net.ipv4.conf.all.forwarding
+    value: 1
+    sysctl_file: /etc/sysctl.conf
+    reload: yes
 
 - name: add k8s apt-key
   apt_key: 
@@ -33,3 +43,24 @@
     repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
     state: present
     update_cache: yes
+
+- name: add docker apt-key
+  apt_key: 
+    url: https://download.docker.com/linux/ubuntu/gpg 
+    state: present 
+
+- name: Add docker repo
+  apt_repository:
+    repo: deb https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+    update_cache: yes
+  
+- name: install docker
+  package:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - python3-apt
+      - software-properties-common
+    state: present
