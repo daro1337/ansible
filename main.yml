@@ -15,9 +15,9 @@
   #   tags: ubuntu
   #   when: ansible_os_family == "Debian"
   
-  - name: Roles for k8s-common
-    include: roles/k8s-common/main.yml
-    tags: k8s-common
+  - name: Roles for tf-k8s-common
+    include: roles/tf-k8s-common/main.yml
+    tags: tf-k8s-common
     when: "'k8s' in group_names"
 
   - name: Roles for tf-kubelet
@@ -29,3 +29,8 @@
     include: roles/tf-k8s-master/main.yml
     tags: tf-k8s-master
     when: "'tf-k8s-master' in group_names"
+
+  - name: Roles for tf-k8s-haproxy
+    include: roles/tf-k8s-haproxy/main.yml
+    tags: tf-k8s-haproxy
+    when: "'tf-k8s-haproxy' in group_names"
