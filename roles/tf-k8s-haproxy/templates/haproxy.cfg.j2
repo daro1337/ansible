@@ -34,7 +34,7 @@ defaults
         errorfile 504 /etc/haproxy/errors/504.http
 
 frontend kubernetes
-  bind 192.168.168.250:6443
+  bind *:6443
   option tcplog
   mode tcp
   default_backend kubernetes-master-nodes
@@ -46,3 +46,10 @@ backend kubernetes-master-nodes
 {% for item in groups['tf-k8s-master'] %}
         server {{ hostvars[item]['inventory_hostname'] }} {{ hostvars[item]['ansible_default_ipv4']['address'] }}:6443 fall 3 rise 2
 {% endfor %}
+
+    listen stats
+      bind *:32700
+      stats enable
+      stats uri /
+      stats hide-version
+      stats auth admin:admin
