@@ -4,3 +4,68 @@
       - kubeadm 
       - kubectl
     state: present
+
+- name: Creates directory
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /etc/etcd
+    - /var/lib/etcd
+
+- name: Copy k8s cert
+  copy:
+    src: ../../files/k8s.crt
+    dest:  /etc/etcd/k8s.crt
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy ca cert
+  copy:
+    src: ../../files/ca.crt
+    dest:  /etc/etcd/ca.crt
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Copy k8s key
+  copy:
+    content: "{{ k8s_key }}"
+    dest: "/etc/etcd/k8s.key"
+
+- name: Unarchive etcd
+  unarchive:
+    src: https://github.com/etcd-io/etcd/releases/download/v3.3.13/etcd-v3.3.13-linux-amd64.tar.gz
+    dest: /tmp/
+    remote_src: yes
+  register: unarchibe_etcd
+
+- name: Copy etcd binary
+  copy:
+    remote_src: yes
+    src:  "/tmp/etcd-v3.3.13-linux-amd64/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: root
+    group: root
+    mode: 0755
+  with_items:
+    - etcd
+    - etcdctl
+  when: unarchibe_etcd.changed
+
+
+- name: Create etcd systemd service
+  template:
+    src: etcd.service.j2
+    dest: /etc/systemd/system/etcd.service
+    mode: 0644
+  register: etcd_service
+
+- name: etcd systemd
+  systemd:
+    name: etcd
+    state: restarted
+    enabled: yes
+    daemon_reload: yes
+  when: etcd_service.changed
