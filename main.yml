@@ -33,4 +33,4 @@
   - name: Roles for tf-k8s-haproxy
     include: roles/tf-k8s-haproxy/main.yml
     tags: tf-k8s-haproxy
-    when: "'tf-k8s-haproxy' in group_names"
+    when: "'tf-haproxy' in group_names"

@@ -1,0 +1,48 @@
+    totem {
+      version: 2
+      cluster_name: haproxy-cluster
+      token: 3000
+      token_retransmits_before_loss_const: 10
+      clear_node_high_bit: yes
+      crypto_cipher: aes256
+      crypto_hash: sha256
+      interface {
+        ringnumber: 0
+        bindnetaddr: {{ ansible_default_ipv4.address }}
+        broadcast: yes
+        mcastport: 5405
+        ttl: 1
+      }
+    }
+{% set ringnumber = 0 %}
+nodelist {
+{% for item in groups['tf-haproxy'] %}
+	node {
+		ring{{ ringnumber }}_addr: {{ hostvars[item]['ansible_default_ipv4']['address'] }}
+		nodeid: {{ loop.index }}
+    name: {{ hostvars[item]['inventory_hostname'] }}
+	}
+{% endfor %}
+}
+
+
+    logging {
+      fileline: off
+      to_stderr: no
+      to_logfile: yes
+      logfile: /var/log/corosync/corosync.log
+      to_syslog: yes
+      syslog_facility: daemon
+      debug: off
+      timestamp: on
+      logger_subsys {
+        subsys: QUORUM
+        debug: off
+      }
+    }
+
+    quorum {
+      provider: corosync_votequorum
+      two_node: 1
+      expected_votes: 2
+    }

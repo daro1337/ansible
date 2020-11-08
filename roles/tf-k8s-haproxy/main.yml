@@ -1,0 +1,58 @@
+
+- name: install packages for haproxy
+  package:
+    name:
+      - haproxy
+      - pacemaker
+      - corosync
+      - crmsh
+      - pcs
+
+- name: Create new haproxy.cfg
+  template:
+    src: haproxy.cfg.j2
+    dest: /etc/haproxy/haproxy.cfg
+    mode: 0644
+  register: haproxy_conf
+
+- name: Create new corosync.conf
+  template:
+    src: corosync.conf.j2
+    dest: /etc/corosync/corosync.conf
+    mode: 0644
+  register: corosync_conf
+
+- name: Create corosync authkey file
+  shell: "echo '{{ corosync_authkey }}' | base64 -d > /etc/corosync/authkey"
+  register: corosync_auth
+
+- name: restart pacemaker
+  service:
+    name: pacemaker
+    state: restarted
+  when: corosync_conf.changed or corosync_auth.changed
+
+- name: restart haproxy
+  service:
+    name: haproxy
+    state: restarted
+  register: haproxy_service
+  when: haproxy_conf.changed
+
+- name: Create new cib.txt
+  template:
+    src: cib.txt.j2
+    dest: /etc/corosync/cib.txt
+    mode: 0644
+  register: cib_txt
+
+- name: Create Pacemaker resources
+  shell: "cat /etc/corosync/cib.txt | crm configure"
+  when: cib_txt.changed
+
+- name: restart haproxy
+  service:
+    name: haproxy
+    state: restarted
+  when: haproxy_service.changed
+

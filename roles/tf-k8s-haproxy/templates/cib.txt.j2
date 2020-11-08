@@ -1,0 +1,5 @@
+property stonith-enabled=false
+property no-quorum-policy=ignore
+primitive virtual-ip-resource ocf:heartbeat:IPaddr2 params ip="192.168.168.250" broadcast=192.168.168.255 nic=eth0 cidr_netmask=24 meta migration-threshold=2 op monitor interval=20 timeout=60 on-fail=restart
+commit
+bye

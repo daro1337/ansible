@@ -1,5 +1,6 @@
 - name: install packages for kubelet
   package:
     name:
-      - kubelet 
+      - kubelet
+      - kubeadm
     state: present
